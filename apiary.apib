@@ -26,7 +26,7 @@ Get a security key for operations later
             "permissions":["user","admin"]
         }
 
-### User Login [POST /v1/user/login{?username,password}]
+### User Login [GET /v1/user/login{?username,password}]
 
 Login with username and password, return a security key for operation later
 
@@ -113,6 +113,8 @@ This operation a to get a user by id
         }
         
 ### Patch User by ID [PATCH /v1/users/{id}]
+Update information of user with id.
+
 + Parameters
     - id : `1` (int, required) - User Name
     
@@ -146,7 +148,8 @@ This operation a to get a user by id
             "email" : "zhang2@mail2.sysu.edu.cn"
         }
 
-### Get meetings owned on User by ID [GET /v1/users/{id}/owned-meetings]
+### Get meetings the User owned by ID [GET /v1/users/{id}/owned-meetings]
+Get meetings that the user with user-id created.
 
 + Parameters
     - id : `1` (int, required) - User Name
@@ -165,7 +168,25 @@ This operation a to get a user by id
             },
         ]
         
+### Get meetings the User joined by ID [GET /v1/users/{id}/joined-meetings]
+Get meetings that the user with user-id participated.
 
++ Parameters
+    - id : `1` (int, required) - User Name
+
++ Response 200 (application/json)
+
+        [
+            {
+                "title":"meeting title1",
+                "start":"2017-11-11",
+                "end":"2017-12-12"
+            },{
+                "title":"meeting title2",
+                "start":"2017-11-11",
+                "end":"2017-12-12"
+            },
+        ]
 # Group Meetings
 
 Resource operations related to a Meetings in the API.
@@ -173,6 +194,8 @@ Resource operations related to a Meetings in the API.
 ## Meeting Colection [/meetings]
 
 ### List All Meetings [GET]
+
+List all meetings in this meetings management sysytem
 
 + Response 200 (application/json)
 
