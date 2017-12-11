@@ -1,0 +1,284 @@
+FORMAT: 1A
+HOST: http://agenda25.apiblueprint.org/
+
+# Agenda
+
+Agenda is a simple API allowing consumers to schedule meeting on-line
+
+# Group User
+
+Resource operations related to a user in the API.
+
+## User-Key [/v1/user/getkey{?username,password}]
+
++ Parameters
+    - username : `root` (string, required) - User Name
+    - password : `pass` (required)
+
+### Get User Key [GET]
+
+Get a security key for operations later
+
++ Response 200 (application/json)
+
+        {
+            "key":"1e3576bt"
+            "permissions":["user","admin"]
+        }
+
+### User Login [GET /v1/user/login{?username,password}]
+
+Login with username and password, return a security key for operation later
+
++ Parameter
+    - username : `root` (string, required) - User Name
+    - password : `pass` (required)
+    
++ Response 200 (application/json)
+
+            {
+                "key":"1e3576bt"
+                "permissions":["user","admin"]
+            }
+
+
+# Group Users
+
+Resources related to a users in the API.
+
+## Users Collection [/v1/users{?key}]
+
++ Parameters
+    - key : `1e3576bt` (string, required)
+
+### List all Users [GET]
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id":1
+                "username":"zhang3"
+                "password":"zhang"
+                "email":"zhang3@mail2.sysu.edu.cn"
+            },{
+                "id":2
+                "username":"li4"
+                "password":"li"
+                "email":"li4@mail2.sysu.edu.cn"
+            }
+        ]
+
+### Create a New User [POST]
+
+This operation is like registering a user
+
++ Request (application/json)
+
+        {
+            "username":"zhang3"
+            "password":"zhang"
+            "email":"zhang3@mail2.sysu.edu.cn"
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /users/1
+
+    + Body
+
+            {
+                "id": 1
+                "username":"zhang3"
+                "password":"zhang"
+                "email":"zhang3@mail2.sysu.edu.cn"
+            }
+
+### Get User by ID [GET /v1/users/{id}]
+
+This operation a to get a user by id
+
++ Parameters
+    - id : `1` (int, required) - User Name
+
++ Response 200 (application/json)
+
+        {
+            "id" : 1
+            "username":"zhang3"
+            "password":"zhang"
+            "email":"zhang3@mail2.sysu.edu.cn"
+        }
+        
+### Patch User by ID [PATCH /v1/users/{id}]
+Update information of user with id.
+
++ Parameters
+    - id : `1` (int, required) - User Name
+    
++ Request (application/json)
+
+        {
+            "username":"zhang3"
+            "password":"zhang"
+            "email":"zhang3@mail2.sysu.edu.cn"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "id": 1
+            "username":"zhang3"
+            "password":"zhang"
+            "email":"zhang3@mail2.sysu.edu.cn"
+        }
+
+### Delete User by ID [DELETE /v1/users/{id}]
++ Parameters
+    - id : `1` (int, required) - User Name
+
++ Response 200 (application/json)
+
+        {
+            "id" : 1
+            "username" : "zhang3"
+            "passwprd" : "zhang"
+            "email" : "zhang2@mail2.sysu.edu.cn"
+        }
+
+### Get meetings the User owned by ID [GET /v1/users/{id}/owned-meetings]
+Get meetings that the user with user-id created.
+
++ Parameters
+    - id : `1` (int, required) - User Name
+
++ Response 200 (application/json)
+
+        [
+            {
+                "title":"meeting title1",
+                "start":"2017-11-11",
+                "end":"2017-12-12"
+            },{
+                "title":"meeting title2",
+                "start":"2017-11-11",
+                "end":"2017-12-12"
+            },
+        ]
+        
+### Get meetings the User joined by ID [GET /v1/users/{id}/joined-meetings]
+Get meetings that the user with user-id participated.
+
++ Parameters
+    - id : `1` (int, required) - User Name
+
++ Response 200 (application/json)
+
+        [
+            {
+                "title":"meeting title1",
+                "start":"2017-11-11",
+                "end":"2017-12-12"
+            },{
+                "title":"meeting title2",
+                "start":"2017-11-11",
+                "end":"2017-12-12"
+            },
+        ]
+# Group Meetings
+
+Resource operations related to a Meetings in the API.
+
+## Meeting Colection [/meetings]
+
+### List All Meetings [GET]
+
+List all meetings in this meetings management sysytem
+
++ Response 200 (application/json)
+
+        [
+            {
+                "title":"service computing",
+                "start":"2017-08-05T08:40:51.620Z",
+                "end":"2017-08-05T08:40:51.620Z",
+                "participators":[
+                    {
+                        "part1":"name1",
+                        "part2":"name2",
+                        "part3":"name3"
+                    }, {
+                        "part1":"name1",
+                        "part2":"name2",
+                        "part3":"name3"
+                    }
+                ]
+            }, 
+            {
+                "title":"service computing",
+                "start":"2017-08-05T08:40:51.620Z",
+                "end":"2017-08-05T08:40:51.620Z",
+                "participators":[
+                    {
+                        "part1":"name1",
+                        "part2":"name2",
+                        "part3":"name3"
+                    }, {
+                        "part1":"name1",
+                        "part2":"name2",
+                        "part3":"name3"
+                    }
+                ]                
+            }
+    
+        ]
+
+### Create a New Meeting [POST]
+
+You may create your own meeting using this action. It takes a JSON object containing a meeting
+
++ Request (application/json)
+
+        {
+            "title":"meeting title"
+            "start":"2017-08-05T08:40:51.620Z",
+            "end":"2017-08-05T08:40:51.620Z",
+            "participators":[
+                    {
+                        "part1":"name1",
+                        "part2":"name2",
+                        "part3":"name3"
+                    }, {
+                        "part1":"name1",
+                        "part2":"name2",
+                        "part3":"name3"
+                    }
+            ]              
+        }
+
++ Response 201 (application/json)
+
+    + Headers
+    
+            Location: /meetings/2
+        
+    + Body
+    
+            {
+                "title":"meeting title"
+                "start":"2017-08-05T08:40:51.620Z",
+                "end":"2017-08-05T08:40:51.620Z",
+                "participators":[
+                        {
+                            "part1":"name1",
+                            "part2":"name2",
+                            "part3":"name3"
+                        }, {
+                            "part1":"name1",
+                            "part2":"name2",
+                            "part3":"name3"
+                        }
+                ]              
+            }
