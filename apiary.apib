@@ -27,6 +27,9 @@ Get a security key for operations later
         }
 
 ### User Login [POST /v1/user/login{?username,password}]
+
+Login with username and password, return a security key for operation later
+
 + Parameter
     - username : `root` (string, required) - User Name
     - password : `pass` (required)
@@ -68,6 +71,8 @@ Resources related to a users in the API.
 
 ### Create a New User [POST]
 
+This operation is like registering a user
+
 + Request (application/json)
 
         {
@@ -92,6 +97,8 @@ Resources related to a users in the API.
             }
 
 ### Get User by ID [GET /v1/users/{id}]
+
+This operation a to get a user by id
 
 + Parameters
     - id : `1` (int, required) - User Name
