@@ -47,21 +47,29 @@ Login with username and password, return a security key for operation later
 
             {
                 "success":"true"
+                "state":"login"
             }
 
-### User Logout [GET /v1/user/state/logout{?username,password}]
+### User Logout [POST /v1/user/state/logout{?key}]
 
 Logout with username and password, seriously, we needn't do it like this, 
 just need to request a post, the session in backend service solve it
 
-+ Parameter
-    - username : `root` (string, required) - User Name
-    - password : `pass` (required)
++ Parameters
+    - key : `1e3576bt` (string, required)
     
-+ Response 200 (application/json)
++ Request (application/json)
+
+        {
+            "username":"root"
+            "password":"pass"
+        }
+    
++ Response 201 (application/json)
 
         {
             "success":"true"
+            "state":"logout"
         }
 
         
@@ -80,16 +88,16 @@ Resources related to a users in the API.
 
         [
             {
-                "id":1
-                "username":"zhang3"
-                "password":"zhang"
-                "email":"zhang3@mail2.sysu.edu.cn"
+                "id":1,
+                "username":"zhang3",
+                "password":"zhang",
+                "email":"zhang3@mail2.sysu.edu.cn",
                 "phone":"13256984563"
             },{
-                "id":2
-                "username":"li4"
-                "password":"li"
-                "email":"li4@mail2.sysu.edu.cn"
+                "id":2,
+                "username":"li4",
+                "password":"li",
+                "email":"li4@mail2.sysu.edu.cn",
                 "phone":"13256984563"
             }
         ]
@@ -211,6 +219,7 @@ Get meetings that the user with user-id created.
 
         [
             {
+                "sponsor":"zhang3"
                 "title":"meeting title1",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
@@ -221,6 +230,7 @@ Get meetings that the user with user-id created.
                 ]
             },
             {
+                "sponsor":"zhang3"
                 "title":"meeting title2",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
@@ -242,6 +252,7 @@ Get meetings that the user with user-id participated.
 
         [
             {
+                "sponsor":"zhang3"
                 "title":"meeting title1",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
@@ -252,6 +263,7 @@ Get meetings that the user with user-id participated.
                 ]
             },
             {
+                "sponsor":"zhang3"
                 "title":"meeting title2",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
@@ -276,6 +288,7 @@ List all meetings in this meetings management sysytem
 
         [
             {
+                "sponsor":"zhang3"
                 "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
@@ -287,6 +300,7 @@ List all meetings in this meetings management sysytem
                 
             }, 
             {
+                "sponsor":"zhang3"
                 "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
@@ -307,6 +321,7 @@ You may create your own meeting using this action. It takes a JSON object contai
 + Request (application/json)
 
            {
+                "sponsor":"zhang3"
                 "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
@@ -326,6 +341,7 @@ You may create your own meeting using this action. It takes a JSON object contai
     + Body
     
             {
+                "sponsor":"zhang3"
                 "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
