@@ -29,13 +29,19 @@ Get a security key for operations later, i think it unnecessary.
         
 ## User - login or logout [/v1/user/state/]
 
-### User Login [GET /v1/user/state/login{?username,password}]
-
+### User Login [POST /v1/user/state/login{?key}]
+    
 Login with username and password, return a security key for operation later
 
-+ Parameter
-    - username : `root` (string, required) - User Name
-    - password : `pass` (required)
++ Parameters
+    - key : `1e3576bt` (string, required)
+
++ Request (application/json)
+
+        {
+            "username":"root"
+            "password":"pass"
+        }
     
 + Response 200 (application/json)
 
@@ -180,7 +186,7 @@ Update information of user with id.
             "phone":"13256984563"
         }
 
-### Delete User by Username [DELETE /v1/users/{?username,password}]
+### Delete User by Username [DELETE /v1/users{?username,password}]
 + Parameters
     - username : `root` (int, required) - User Name
     - password : `pass` (required) - password
