@@ -17,31 +17,62 @@ Resource operations related to a user in the API.
 
 ### Get User Key [GET]
 
-Get a security key for operations later
+Get a security key for operations later, i think it unnecessary.
 
 + Response 200 (application/json)
 
         {
-            "key":"1e3576bt"
-            "permissions":["user","admin"]
+            "key":"1e3576bt",
+            "permissions":{"user","admin"}
         }
+        
+        
+## User - login or logout [/v1/user/state/]
 
-### User Login [GET /v1/user/login{?username,password}]
-
+### User Login [POST /v1/user/state/login{?key}]
+    
 Login with username and password, return a security key for operation later
 
-+ Parameter
-    - username : `root` (string, required) - User Name
-    - password : `pass` (required)
++ Parameters
+    - key : `1e3576bt` (string, required)
+
++ Request (application/json)
+
+        {
+            "username":"root"
+            "password":"pass"
+        }
     
 + Response 200 (application/json)
 
             {
-                "key":"1e3576bt"
-                "permissions":["user","admin"]
+                "success":"true"
+                "state":"login"
             }
 
+### User Logout [POST /v1/user/state/logout{?key}]
 
+Logout with username and password, seriously, we needn't do it like this, 
+just need to request a post, the session in backend service solve it
+
++ Parameters
+    - key : `1e3576bt` (string, required)
+    
++ Request (application/json)
+
+        {
+            "username":"root"
+            "password":"pass"
+        }
+    
++ Response 201 (application/json)
+
+        {
+            "success":"true"
+            "state":"logout"
+        }
+
+        
 # Group Users
 
 Resources related to a users in the API.
@@ -57,15 +88,17 @@ Resources related to a users in the API.
 
         [
             {
-                "id":1
-                "username":"zhang3"
-                "password":"zhang"
-                "email":"zhang3@mail2.sysu.edu.cn"
+                "id":1,
+                "username":"zhang3",
+                "password":"zhang",
+                "email":"zhang3@mail2.sysu.edu.cn",
+                "phone":"13256984563"
             },{
-                "id":2
-                "username":"li4"
-                "password":"li"
-                "email":"li4@mail2.sysu.edu.cn"
+                "id":2,
+                "username":"li4",
+                "password":"li",
+                "email":"li4@mail2.sysu.edu.cn",
+                "phone":"13256984563"
             }
         ]
 
@@ -79,6 +112,7 @@ This operation is like registering a user
             "username":"zhang3"
             "password":"zhang"
             "email":"zhang3@mail2.sysu.edu.cn"
+            "phone":"13256984563"
         }
 
 + Response 201 (application/json)
@@ -94,6 +128,7 @@ This operation is like registering a user
                 "username":"zhang3"
                 "password":"zhang"
                 "email":"zhang3@mail2.sysu.edu.cn"
+                "phone":"13256984563"
             }
 
 ### Get User by ID [GET /v1/users/{id}]
@@ -110,8 +145,24 @@ This operation a to get a user by id
             "username":"zhang3"
             "password":"zhang"
             "email":"zhang3@mail2.sysu.edu.cn"
+            "phone":"13256984563"
         }
-        
+
+### Get User by username [GET /v1/users/{?username}]     
+
++ Parameters
+    - username : `zhang3` (string, required) - User Name
+
++ Response 200 (application/json)
+
+        {
+            "id" : 1
+            "username":"zhang3"
+            "password":"zhang"
+            "email":"zhang3@mail2.sysu.edu.cn"
+            "phone":"13256984563"
+        }
+
 ### Patch User by ID [PATCH /v1/users/{id}]
 Update information of user with id.
 
@@ -124,16 +175,10 @@ Update information of user with id.
             "username":"zhang3"
             "password":"zhang"
             "email":"zhang3@mail2.sysu.edu.cn"
+            "phone":"13256984563"
         }
 
-+ Response 200 (application/json)
-
-        {
-            "id": 1
-            "username":"zhang3"
-            "password":"zhang"
-            "email":"zhang3@mail2.sysu.edu.cn"
-        }
++ Response 204
 
 ### Delete User by ID [DELETE /v1/users/{id}]
 + Parameters
@@ -146,8 +191,24 @@ Update information of user with id.
             "username" : "zhang3"
             "passwprd" : "zhang"
             "email" : "zhang2@mail2.sysu.edu.cn"
+            "phone":"13256984563"
         }
 
+### Delete User by Username [DELETE /v1/users{?username,password}]
++ Parameters
+    - username : `root` (int, required) - User Name
+    - password : `pass` (required) - password
+
++ Response 200 (application/json)
+
+        {
+            "id" : 1
+            "username" : "zhang3"
+            "passwprd" : "zhang"
+            "email" : "zhang2@mail2.sysu.edu.cn"
+            "phone":"13256984563"
+        }
+        
 ### Get meetings the User owned by ID [GET /v1/users/{id}/owned-meetings]
 Get meetings that the user with user-id created.
 
@@ -158,13 +219,26 @@ Get meetings that the user with user-id created.
 
         [
             {
+                "sponsor":"zhang3"
                 "title":"meeting title1",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
-            },{
+                "participators":[
+                    "part1",
+                    "part2",
+                    "part3"
+                ]
+            },
+            {
+                "sponsor":"zhang3"
                 "title":"meeting title2",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
+                "participators":[
+                    "part1",
+                    "part2",
+                    "part3"
+                ]
             },
         ]
         
@@ -178,13 +252,26 @@ Get meetings that the user with user-id participated.
 
         [
             {
+                "sponsor":"zhang3"
                 "title":"meeting title1",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
-            },{
+                "participators":[
+                    "part1",
+                    "part2",
+                    "part3"
+                ]
+            },
+            {
+                "sponsor":"zhang3"
                 "title":"meeting title2",
                 "start":"2017-11-11",
                 "end":"2017-12-12"
+                "participators":[
+                    "part1",
+                    "part2",
+                    "part3"
+                ]
             },
         ]
 # Group Meetings
@@ -201,36 +288,28 @@ List all meetings in this meetings management sysytem
 
         [
             {
+                "sponsor":"zhang3"
                 "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
-                "participators":[
-                    {
-                        "part1":"name1",
-                        "part2":"name2",
-                        "part3":"name3"
-                    }, {
-                        "part1":"name1",
-                        "part2":"name2",
-                        "part3":"name3"
-                    }
-                ]
+                "participators": [
+                        "name1",
+                        "name2",
+                        "name3",
+                    ]
+                
             }, 
             {
+                "sponsor":"zhang3"
                 "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
-                "participators":[
-                    {
-                        "part1":"name1",
-                        "part2":"name2",
-                        "part3":"name3"
-                    }, {
-                        "part1":"name1",
-                        "part2":"name2",
-                        "part3":"name3"
-                    }
-                ]                
+                "participators": [
+                        "name1",
+                        "name2",
+                        "name3",
+                    ]
+                        
             }
     
         ]
@@ -241,21 +320,16 @@ You may create your own meeting using this action. It takes a JSON object contai
 
 + Request (application/json)
 
-        {
-            "title":"meeting title"
-            "start":"2017-08-05T08:40:51.620Z",
-            "end":"2017-08-05T08:40:51.620Z",
-            "participators":[
-                    {
-                        "part1":"name1",
-                        "part2":"name2",
-                        "part3":"name3"
-                    }, {
-                        "part1":"name1",
-                        "part2":"name2",
-                        "part3":"name3"
-                    }
-            ]              
+           {
+                "sponsor":"zhang3"
+                "title":"service computing",
+                "start":"2017-08-05T08:40:51.620Z",
+                "end":"2017-08-05T08:40:51.620Z",
+                "participators": [
+                        "name1",
+                        "name2",
+                        "name3",
+                    ]
         }
 
 + Response 201 (application/json)
@@ -267,18 +341,12 @@ You may create your own meeting using this action. It takes a JSON object contai
     + Body
     
             {
-                "title":"meeting title"
+                "sponsor":"zhang3"
+                "title":"service computing",
                 "start":"2017-08-05T08:40:51.620Z",
                 "end":"2017-08-05T08:40:51.620Z",
-                "participators":[
-                        {
-                            "part1":"name1",
-                            "part2":"name2",
-                            "part3":"name3"
-                        }, {
-                            "part1":"name1",
-                            "part2":"name2",
-                            "part3":"name3"
-                        }
-                ]              
-            }
+                "participators": [
+                        "name1",
+                        "name2",
+                        "name3",
+                        ]
