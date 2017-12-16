@@ -3,4 +3,4 @@ go:
   - 1.9 # The latest version of Go.
   
 install:    cd cli && go get -d -v && cd ../services && go get -d -v && cd ..
-script:    bash build.sh && services/agenda-server && bash test.sh
+script:    bash build.sh ; services/agenda-server &  bash test.sh
