@@ -18,14 +18,14 @@ func (dao *meetingDao) Save(m *Meeting) error {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(m.Sponsor, m.Title, m.Start, m.End, partsBlob)
+	_, err = stmt.Exec(NewNullString(m.Sponsor), NewNullString(m.Title), NewNullString(m.Start), NewNullString(m.End), partsBlob)
 	return err
 }
 
 // find by sponsor
 
 func (dao *meetingDao) FindBySponsor(sponsor string) []Meeting {
-	stmt := "select * from meeting where sponsor = ?"
+	stmt := "select * from meeting where sponsor = " + sponsor
 	return dao.execQueryStmt(stmt)
 }
 
