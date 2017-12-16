@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.8
 
 RUN mkdir -p /agenda-cs
 RUN apt-get update && apt-get install -y sqlite3
