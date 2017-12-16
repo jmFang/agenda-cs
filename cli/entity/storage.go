@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
+	//"net/url"
+	"os"
 	"sync"
 )
 
@@ -17,6 +18,8 @@ type storage struct {
 	Dirty       bool
 	CurUser     User
 }
+
+const root_url = "http://localhost:8080"
 
 var (
 	s    *storage
@@ -37,8 +40,9 @@ func Storage() *storage {
 func (s *storage) Register(user *User) error {
 	if bs, err := json.Marshal(user); err == nil {
 		req := bytes.NewBuffer([]byte(bs))
+		os.Stdout.Write(bs)
 		contentType := "application/json;charset=utf-8"
-		resp, err := http.Post("https://private-ff790a-agenda25.apiary-mock.com/v1/users?key=1e3576bt", contentType, req)
+		resp, err := http.Post(root_url+"/v1/users?key=1e3576bt", contentType, req)
 		if err != nil {
 			return err
 		}
@@ -63,13 +67,12 @@ func (s *storage) Login(username string, password string) error {
 	if err == nil {
 		req := bytes.NewBuffer([]byte(bs))
 		contentType := "application/json;charset=utf-8"
-		resp, err := http.Post("https://private-ff790a-agenda25.apiary-mock.com/v1/user/state/login?key=1e3576bt", contentType, req)
+		resp, err := http.Post(root_url+"/v1/user/login?key=1e3576bt", contentType, req)
 		if err != nil {
 			fmt.Println(resp)
 			return err
 		}
 
-		fmt.Println(resp)
 		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
@@ -95,7 +98,7 @@ func (s *storage) Logout() error {
 	if err == nil {
 		req := bytes.NewBuffer([]byte(bs))
 		contentType := "application/json;charset=utf-8"
-		resp, err := http.Post("https://private-ff790a-agenda25.apiary-mock.com/v1/user/state/logout?key=1e3576bt", contentType, req)
+		resp, err := http.Post(root_url+"/v1/user/logout?key=1e3576bt", contentType, req)
 		if err != nil {
 			fmt.Println(resp)
 			return err
@@ -118,10 +121,18 @@ func (s *storage) Logout() error {
 }
 
 func (s *storage) DeleteUser(username string, password string) error {
-	resp, err := http.PostForm("https://private-ff790a-agenda25.apiary-mock.com/v1/users", url.Values{"username": {username}, "password": {password}})
+	var info UserInfo
+	info.Username = username
+	info.Password = password
+	bs, err := json.Marshal(info)
 	if err != nil {
 		return err
 	}
+	reqBody := bytes.NewBuffer([]byte(bs))
+	client := &http.Client{}
+	req, _ := http.NewRequest("DELETE", root_url+"/v1/users", reqBody)
+	req.Header.Set("content-type", "application/json")
+	resp, err := client.Do(req)
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -140,7 +151,7 @@ func (s *storage) DeleteUser(username string, password string) error {
 func (s *storage) ListAllusers() ([]RetUser, error) {
 
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "https://private-ff790a-agenda25.apiary-mock.com/v1/users?key=1e3576bt", nil)
+	req, _ := http.NewRequest("GET", root_url+"/v1/users?key=1e3576bt", nil)
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -154,9 +165,6 @@ func (s *storage) ListAllusers() ([]RetUser, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	fmt.Println(resp.Status)
-	fmt.Println(string(body))
 
 	json.Unmarshal(body, &s.UserList)
 
@@ -175,7 +183,7 @@ func (s *storage) addMeeting(m Meeting) error {
 
 	req := bytes.NewBuffer([]byte(bs))
 	contentType := "application/json;charset=utf-8"
-	resp, err := http.Post("https://private-ff790a-agenda25.apiary-mock.com/v1/users?key=1e3576bt", contentType, req)
+	resp, err := http.Post(root_url+"/v1/meetings?key=1e3576bt", contentType, req)
 	if err != nil {
 		return err
 	}
@@ -201,7 +209,7 @@ func (s *storage) addMeeting(m Meeting) error {
 // Shwo all meetings that have been created in the system
 func (s *storage) ListAllMeetings() ([]Meeting, error) {
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "https://private-ff790a-agenda25.apiary-mock.com/meetings", nil)
+	req, _ := http.NewRequest("GET", root_url+"/v1/meetings", nil)
 	resp, err := client.Do(req)
 
 	if err != nil {

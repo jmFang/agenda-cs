@@ -15,8 +15,8 @@
 package cmd
 
 import (
-	"agenda-cs/cli/entity"
 	"fmt"
+	"github.com/dzc15331066/agenda-cs/cli/entity"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
