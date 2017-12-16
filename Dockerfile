@@ -7,5 +7,5 @@ WORKDIR /agenda-cs
 RUN cd cli && go get -d -v && go build
 RUN cd services/service &&  go get -d -v && go build
 
-CMD ["/agenda-cs/services/service"]
+CMD ["/agenda-cs/services/services"]
 
