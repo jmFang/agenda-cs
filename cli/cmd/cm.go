@@ -34,7 +34,7 @@ to quickly create a Cobra application.`,
 		start, _ := cmd.Flags().GetString("start")
 		end, _ := cmd.Flags().GetString("end")
 		// time parse
-		err := as.AddMeeting(title, start, end, participator)
+		_, err := as.AddMeeting(title, start, end, participator)
 		message(err, "[success]: Adding meeting successfully!")
 	},
 }

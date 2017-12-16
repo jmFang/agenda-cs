@@ -34,7 +34,7 @@ to quickly create a Cobra application.`,
 		email, _ := cmd.Flags().GetString("email")
 		phone, _ := cmd.Flags().GetString("contact")
 		log.Infoln("Register:")
-		err := as.UserRegister(username, password, email, phone)
+		_, err := as.UserRegister(username, password, email, phone)
 		message(err, "[success]:OK! register successfully!")
 	},
 }

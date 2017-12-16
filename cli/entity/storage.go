@@ -12,11 +12,15 @@ import (
 	"sync"
 )
 
+const (
+	curUserFilename = "curUser.txt"
+)
+
 type storage struct {
 	UserList    []RetUser
 	MeetingList []Meeting
 	Dirty       bool
-	CurUser     User
+	CurUser     UserInfo
 }
 
 const root_url = "http://localhost:8080"
@@ -36,26 +40,92 @@ func Storage() *storage {
 	return s
 }
 
+// read CurUser from file
+func (s *storage) readCurUser() error {
+	if err := readFromFile(&s.CurUser, curUserFilename); err != nil {
+		return err
+	} else if s.CurUser == (UserInfo{}) {
+		return errors.New("Failed!please login first")
+	}
+	return nil
+}
+
+// write current user to file
+func (s *storage) writeCurUser() error {
+	if s.CurUser != (UserInfo{}) {
+		return writeToFile(s.CurUser, curUserFilename)
+	}
+	return nil
+}
+
+//read json to datalist from file
+func readFromFile(datalist interface{}, filename string) error {
+	//read data from files
+	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+
+	if len(data) > 0 {
+		return json.Unmarshal(data, &datalist)
+	}
+	return nil
+}
+
+// write datalist to file
+func writeToFile(datalist interface{}, filename string) error {
+	data, err := json.Marshal(datalist)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, data, 0666)
+}
+
+// erase current user file while logout.
+func (s *storage) eraseCurUser() error {
+	file, err := os.OpenFile(curUserFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	s.CurUser = UserInfo{}
+	return file.Truncate(0)
+}
+
+//set current user
+func (s *storage) setCurUser(user UserInfo) error {
+	s.CurUser = user
+	return s.writeCurUser()
+}
+
 //register on backend service
-func (s *storage) Register(user *User) error {
+func (s *storage) Register(user *User) (*RetUser, error) {
 	if bs, err := json.Marshal(user); err == nil {
 		req := bytes.NewBuffer([]byte(bs))
-		os.Stdout.Write(bs)
+		//os.Stdout.Write(bs)
 		contentType := "application/json;charset=utf-8"
-		resp, err := http.Post(root_url+"/v1/users?key=1e3576bt", contentType, req)
+		resp, err := http.Post(root_url+"/v1/users?", contentType, req)
 		if err != nil {
-			return err
+			return &RetUser{}, err
 		}
 
 		defer resp.Body.Close()
 
 		if resp.StatusCode == 201 {
 			body, _ := ioutil.ReadAll(resp.Body)
-			fmt.Println(string(body))
-			return nil
+			var ret RetUser
+			//fmt.Println(string(body))
+			json.Unmarshal(body, &ret)
+			//fmt.Println(ret)
+			return &ret, nil
 		}
 	}
-	return registerError
+	return &RetUser{}, registerError
 }
 
 // login on backend service
@@ -67,23 +137,22 @@ func (s *storage) Login(username string, password string) error {
 	if err == nil {
 		req := bytes.NewBuffer([]byte(bs))
 		contentType := "application/json;charset=utf-8"
-		resp, err := http.Post(root_url+"/v1/user/login?key=1e3576bt", contentType, req)
+		resp, err := http.Post(root_url+"/v1/user/login?", contentType, req)
 		if err != nil {
-			fmt.Println(resp)
+			//fmt.Println(resp)
 			return err
 		}
 
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		_, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println(body)
+			//fmt.Println(body)
 			return err
 		}
 		if resp.StatusCode == 200 {
-			s.CurUser.Name = username
-			s.CurUser.Password = password
-			fmt.Println(string(body))
+			s.setCurUser(info)
+			//fmt.Println(string(body))
 			return nil
 		}
 	}
@@ -91,29 +160,33 @@ func (s *storage) Login(username string, password string) error {
 }
 
 func (s *storage) Logout() error {
+	s.eraseCurUser()
+	return nil
+
 	var info UserInfo
-	info.Username = s.CurUser.Name
+	info.Username = s.CurUser.Username
 	info.Password = s.CurUser.Password
 	bs, err := json.Marshal(info)
 	if err == nil {
 		req := bytes.NewBuffer([]byte(bs))
 		contentType := "application/json;charset=utf-8"
-		resp, err := http.Post(root_url+"/v1/user/logout?key=1e3576bt", contentType, req)
+		resp, err := http.Post(root_url+"/v1/user/logout?", contentType, req)
 		if err != nil {
-			fmt.Println(resp)
+			//fmt.Println(resp)
 			return err
 		}
 
-		fmt.Println(resp)
+		//fmt.Println(resp)
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		_, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println(body)
+			//fmt.Println(body)
 			return err
 		}
 		if resp.StatusCode == 201 {
-			fmt.Println(string(body))
+			s.eraseCurUser()
+			//fmt.Println(string(body))
 			return nil
 		}
 	}
@@ -124,6 +197,9 @@ func (s *storage) DeleteUser(username string, password string) error {
 	var info UserInfo
 	info.Username = username
 	info.Password = password
+	if s.CurUser.Username != username || s.CurUser.Password != password {
+		return errors.New("wrong username or password!")
+	}
 	bs, err := json.Marshal(info)
 	if err != nil {
 		return err
@@ -134,14 +210,13 @@ func (s *storage) DeleteUser(username string, password string) error {
 	req.Header.Set("content-type", "application/json")
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode == 200 {
-		fmt.Println(string(body))
-		s.CurUser.Name = ""
-		s.CurUser.Password = ""
+		//fmt.Println(string(body))
+		s.eraseCurUser()
 		return nil
 	}
 	return errors.New("error sending")
@@ -149,9 +224,8 @@ func (s *storage) DeleteUser(username string, password string) error {
 
 //query all users and return them as an Array
 func (s *storage) ListAllusers() ([]RetUser, error) {
-
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", root_url+"/v1/users?key=1e3576bt", nil)
+	req, _ := http.NewRequest("GET", root_url+"/v1/users?", nil)
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -165,27 +239,27 @@ func (s *storage) ListAllusers() ([]RetUser, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
+	//fmt.Println(body)
 	json.Unmarshal(body, &s.UserList)
 
-	fmt.Println(s.UserList)
+	//fmt.Println(s.UserList)
 	return s.UserList, err //is this safe ?
 }
 
 // add a meeting to meeting list.
-func (s *storage) addMeeting(m Meeting) error {
+func (s *storage) addMeeting(m Meeting) (*Meeting, error) {
 	bs, err := json.Marshal(m)
 
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return &Meeting{}, err
 	}
 
 	req := bytes.NewBuffer([]byte(bs))
 	contentType := "application/json;charset=utf-8"
-	resp, err := http.Post(root_url+"/v1/meetings?key=1e3576bt", contentType, req)
+	resp, err := http.Post(root_url+"/v1/meetings?", contentType, req)
 	if err != nil {
-		return err
+		return &Meeting{}, err
 	}
 
 	defer resp.Body.Close()
@@ -194,16 +268,19 @@ func (s *storage) addMeeting(m Meeting) error {
 
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return &Meeting{}, err
 	}
 
-	if resp.StatusCode == 201 {
+	if resp.StatusCode == 200 {
+		var retMeeting Meeting
 		fmt.Println(resp.Status)
-		fmt.Println(string(body))
-		return nil
+		//fmt.Println(string(body))
+		json.Unmarshal(body, &retMeeting)
+		//fmt.Println(retMeeting)
+		return &retMeeting, nil
 	}
 	//json.Unmarshal(resp_body, s.MeetingList)
-	return err
+	return &Meeting{}, err
 }
 
 // Shwo all meetings that have been created in the system
@@ -225,7 +302,7 @@ func (s *storage) ListAllMeetings() ([]Meeting, error) {
 	}
 
 	fmt.Println(resp.Status)
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 
 	json.Unmarshal(body, &s.MeetingList)
 	return s.MeetingList, err //is this safe ?
